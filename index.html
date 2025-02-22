@@ -1,49 +1,46 @@
-<h1>sp32</h1>
+<h1>SP32</h1>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32 Bluetooth Serial</title>
+    <title>ESP32 Bluetooth</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
-        button { padding: 10px; font-size: 16px; margin: 10px; }
-        #output { white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; margin-top: 10px; width: 300px; height: 200px; overflow-y: auto; text-align: left;}
+        #datos { margin-top: 20px; white-space: pre-line; border: 1px solid #ccc; padding: 10px; }
     </style>
 </head>
 <body>
-    <h1>Conectar ESP32 por Bluetooth</h1>
-    <button onclick="connectSerial()">Conectar</button>
-    <div id="output">Esperando datos...</div>
+    <h1>ESP32 Bluetooth</h1>
+    <button onclick="conectarBluetooth()">Conectar</button>
+    <div id="datos">Esperando datos...</div>
 
     <script>
-        let port;
-        let reader;
-        
-        async function connectSerial() {
+        let dispositivo;
+        let caracteristica;
+
+        async function conectarBluetooth() {
             try {
-                // Pedir al usuario que seleccione el puerto serie (Bluetooth)
-                port = await navigator.serial.requestPort();
-                await port.open({ baudRate: 115200 });
+                dispositivo = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: ['0000ffe0-0000-1000-8000-00805f9b34fb'] // UUID del servicio Bluetooth
+                });
+                const server = await dispositivo.gatt.connect();
+                const service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
+                caracteristica = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
 
-                const decoder = new TextDecoderStream();
-                const inputStream = port.readable.pipeThrough(decoder);
-                reader = inputStream.getReader();
-
-                document.getElementById('output').innerText = "Conectado, esperando datos...";
-                readLoop();
+                caracteristica.addEventListener('characteristicvaluechanged', manejarDatos);
+                await caracteristica.startNotifications();
+                document.getElementById("datos").innerText = "Conectado al ESP32. Esperando datos...";
             } catch (error) {
-                console.log(error);
-                document.getElementById('output').innerText = "Error de conexión";
+                console.error(error);
+                alert("Error al conectar: " + error);
             }
         }
 
-        async function readLoop() {
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) break;
-                document.getElementById('output').innerText += "\n" + value;
-            }
+        function manejarDatos(event) {
+            let valor = new TextDecoder().decode(event.target.value);
+            document.getElementById("datos").innerText = "Datos recibidos:\n" + valor;
         }
     </script>
 </body>
