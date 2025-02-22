@@ -1,1 +1,50 @@
 <h1>sp32</h1>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Bluetooth Serial</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        button { padding: 10px; font-size: 16px; margin: 10px; }
+        #output { white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; margin-top: 10px; width: 300px; height: 200px; overflow-y: auto; text-align: left;}
+    </style>
+</head>
+<body>
+    <h1>Conectar ESP32 por Bluetooth</h1>
+    <button onclick="connectSerial()">Conectar</button>
+    <div id="output">Esperando datos...</div>
+
+    <script>
+        let port;
+        let reader;
+        
+        async function connectSerial() {
+            try {
+                // Pedir al usuario que seleccione el puerto serie (Bluetooth)
+                port = await navigator.serial.requestPort();
+                await port.open({ baudRate: 115200 });
+
+                const decoder = new TextDecoderStream();
+                const inputStream = port.readable.pipeThrough(decoder);
+                reader = inputStream.getReader();
+
+                document.getElementById('output').innerText = "Conectado, esperando datos...";
+                readLoop();
+            } catch (error) {
+                console.log(error);
+                document.getElementById('output').innerText = "Error de conexión";
+            }
+        }
+
+        async function readLoop() {
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                document.getElementById('output').innerText += "\n" + value;
+            }
+        }
+    </script>
+</body>
+</html>
