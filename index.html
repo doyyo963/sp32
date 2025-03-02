@@ -167,24 +167,13 @@
         }
     </style>
 </head>
-<body>
-        
-        <!-- Botón Bluetooth -->
-        <button onclick="connectToPairedDevice()">Bluetooth</button>
-
-        <div class="detected-color-container">
-            <div style="font-weight: bold; font-size: 20px;">DETECTED COLOR</div>
-            <div id="detected-color" style="font-size: 22px;">"INDEFINIDO"</div>
-        </div>
-
-        <div id="intensity-container">INTENSIDAD: 0</div>
-        <div id="lux">LUX: 0</div>
-    </div>
+<button onclick="connectBluetooth()"> Bluetooth</button>
+</div>
 
 <!-- Firebase Scripts -->
 <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
-
+<body>
     <div class="main-container">
         <div class="title">LFA Reader</div>
         <div class="detected-color-container">
@@ -245,6 +234,8 @@
             });
         }
 
+        
+
         function toggleBluetooth() {
             useBluetooth = !useBluetooth;
             console.log("Bluetooth " + (useBluetooth ? "Activado" : "Desactivado"));
@@ -298,30 +289,23 @@
         updateValue("Lux", "lux", "LUX: ");
         updateValue("Intensidad", "intensity-container", "INTENSIDAD: ");
 
-        async function connectToPairedDevice() {
+        async function connectBluetooth() {
     try {
-        const devices = await navigator.bluetooth.getDevices();
+        const device = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,
+            optionalServices: ['battery_service']
+        });
+        console.log("Dispositivo seleccionado:", device.name);
         
-        if (devices.length === 0) {
-            alert("No hay dispositivos Bluetooth vinculados disponibles.");
-            return;
-        }
-
-        // Filtrar por un nombre específico si lo deseas
-        const device = devices.find(d => d.name && d.name.includes("ESP32")); 
-
-        if (!device) {
-            alert("No se encontró un dispositivo vinculado con el nombre 'ESP32'.");
-            return;
-        }
-
-        console.log("Intentando conectar a:", device.name);
-
+        // Intentar conectar al dispositivo
         const server = await device.gatt.connect();
         console.log("Conectado a:", device.name);
-
+        
+        // Aquí puedes agregar la lógica de adquisición de datos
         alert("Conectado a " + device.name);
-
+        
+        // Activar Bluetooth en la app
+        useBluetooth = true;
     } catch (error) {
         console.log("Error al conectar Bluetooth:", error);
     }
