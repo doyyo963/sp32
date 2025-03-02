@@ -167,13 +167,24 @@
         }
     </style>
 </head>
-<button onclick="connectBluetooth()"> Bluetooth</button>
-</div>
+<body>
+        
+        <!-- Botón Bluetooth -->
+        <button onclick="connectToPairedDevice()">Bluetooth</button>
+
+        <div class="detected-color-container">
+            <div style="font-weight: bold; font-size: 20px;">DETECTED COLOR</div>
+            <div id="detected-color" style="font-size: 22px;">"INDEFINIDO"</div>
+        </div>
+
+        <div id="intensity-container">INTENSIDAD: 0</div>
+        <div id="lux">LUX: 0</div>
+    </div>
 
 <!-- Firebase Scripts -->
 <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
-<body>
+
     <div class="main-container">
         <div class="title">LFA Reader</div>
         <div class="detected-color-container">
@@ -233,8 +244,6 @@
                 document.getElementById(elementId).innerHTML = prefix + value;
             });
         }
-
-        
 
         function toggleBluetooth() {
             useBluetooth = !useBluetooth;
@@ -317,8 +326,6 @@
         console.log("Error al conectar Bluetooth:", error);
     }
 }
-
-
 
     </script>
 </body>
