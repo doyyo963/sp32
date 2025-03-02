@@ -289,25 +289,35 @@
         updateValue("Lux", "lux", "LUX: ");
         updateValue("Intensidad", "intensity-container", "INTENSIDAD: ");
 
-        async function connectBluetooth() {
+        async function connectToPairedDevice() {
     try {
-        const device = await navigator.bluetooth.requestDevice({
-            filters: [{ namePrefix: "ESP32" }], // Filtra solo dispositivos con "ESP32" en el nombre
-            optionalServices: ['battery_service']
-        });
+        const devices = await navigator.bluetooth.getDevices();
         
-        console.log("Dispositivo seleccionado:", device.name);
-        
+        if (devices.length === 0) {
+            alert("No hay dispositivos Bluetooth vinculados disponibles.");
+            return;
+        }
+
+        // Filtrar por un nombre específico si lo deseas
+        const device = devices.find(d => d.name && d.name.includes("ESP32")); 
+
+        if (!device) {
+            alert("No se encontró un dispositivo vinculado con el nombre 'ESP32'.");
+            return;
+        }
+
+        console.log("Intentando conectar a:", device.name);
+
         const server = await device.gatt.connect();
         console.log("Conectado a:", device.name);
-        
+
         alert("Conectado a " + device.name);
-        
-        useBluetooth = true;
+
     } catch (error) {
         console.log("Error al conectar Bluetooth:", error);
     }
 }
+
 
 
     </script>
