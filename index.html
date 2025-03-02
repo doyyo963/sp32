@@ -167,7 +167,7 @@
         }
     </style>
 </head>
-<button onclick="toggleBluetooth()"> Bluetooth</button>
+<button onclick="connectBluetooth()"> Bluetooth</button>
 </div>
 
 <!-- Firebase Scripts -->
@@ -288,6 +288,29 @@
 
         updateValue("Lux", "lux", "LUX: ");
         updateValue("Intensidad", "intensity-container", "INTENSIDAD: ");
+
+        async function connectBluetooth() {
+    try {
+        const device = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,
+            optionalServices: ['battery_service']
+        });
+        console.log("Dispositivo seleccionado:", device.name);
+        
+        // Intentar conectar al dispositivo
+        const server = await device.gatt.connect();
+        console.log("Conectado a:", device.name);
+        
+        // Aquí puedes agregar la lógica de adquisición de datos
+        alert("Conectado a " + device.name);
+        
+        // Activar Bluetooth en la app
+        useBluetooth = true;
+    } catch (error) {
+        console.log("Error al conectar Bluetooth:", error);
+    }
+}
+
     </script>
 </body>
 </html>
